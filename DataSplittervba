@@ -1,6 +1,4 @@
-Sure, you can modify the code to create the destination worksheet "Split Data" if it doesn't already exist. Here's the updated code:
 
-```vba
 Sub SortAndMoveData()
     Dim wsSource As Worksheet
     Dim wsDest As Worksheet
@@ -60,7 +58,7 @@ Sub SortAndMoveData()
         ' Increment rowCount
         rowCount = rowCount + 1
     Next cell
-End Sub
-```
 
-This code will now create the "Split Data" worksheet if it doesn't exist and then proceed to sort and move the data.
+ ' Auto fit columns in the destination sheet
+    wsDest.Columns.AutoFit
+End Sub
