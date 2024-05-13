@@ -1,0 +1,66 @@
+Sure, you can modify the code to create the destination worksheet "Split Data" if it doesn't already exist. Here's the updated code:
+
+```vba
+Sub SortAndMoveData()
+    Dim wsSource As Worksheet
+    Dim wsDest As Worksheet
+    Dim dataRange As Range
+    Dim cell As Range
+    Dim currentPrefix As String
+    Dim lastRow As Long
+    Dim rowCount As Long
+    Dim i As Long
+    
+    ' Set the source worksheet
+    Set wsSource = ActiveSheet ' Change to your source worksheet
+    
+    ' Check if the destination worksheet "Split Data" exists, otherwise create it
+    On Error Resume Next
+    Set wsDest = ThisWorkbook.Sheets("Split Data")
+    On Error GoTo 0
+    
+    If wsDest Is Nothing Then
+        ' Destination worksheet does not exist, create it
+        Set wsDest = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+        wsDest.Name = "Split Data"
+    End If
+    
+    ' Define the range containing your data in the source sheet
+    Set dataRange = wsSource.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, "A").End(xlUp).Row)
+    
+    ' Sort the data in the source range
+    dataRange.Sort key1:=dataRange, order1:=xlAscending, Header:=xlNo
+    
+    ' Clear contents of destination sheet before moving data
+    wsDest.Cells.Clear
+    
+    ' Initialize variables
+    lastRow = 1
+    currentPrefix = Left(dataRange.Cells(1).Value, 2)
+    rowCount = 0
+    
+    ' Loop through each cell in the sorted range
+    For Each cell In dataRange
+        ' Check if the prefix of the current cell is different from the previous cell
+        If Left(cell.Value, 2) <> currentPrefix Then
+            ' Insert an empty line
+            wsDest.Rows(lastRow + rowCount).Insert Shift:=xlDown
+            
+            ' Update the current prefix
+            currentPrefix = Left(cell.Value, 2)
+            
+            ' Update last row and reset rowCount
+            lastRow = lastRow + rowCount + 1
+            rowCount = 0
+        End If
+        
+        ' Copy the entire row to the next available row in the destination sheet
+        cell.EntireRow.Copy wsDest.Rows(lastRow + rowCount)
+        
+        ' Increment rowCount
+        rowCount = rowCount + 1
+    Next cell
+End Sub
+```
+
+This code will now create the "Split Data" worksheet if it doesn't exist and then proceed to sort and move the data.
