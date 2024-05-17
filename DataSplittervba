@@ -1,4 +1,3 @@
-
 Sub SortAndMoveData()
     Dim wsSource As Worksheet
     Dim wsDest As Worksheet
@@ -8,57 +7,59 @@ Sub SortAndMoveData()
     Dim lastRow As Long
     Dim rowCount As Long
     Dim i As Long
-    
+
     ' Set the source worksheet
     Set wsSource = ActiveSheet ' Change to your source worksheet
-    
+
     ' Check if the destination worksheet "Split Data" exists, otherwise create it
     On Error Resume Next
     Set wsDest = ThisWorkbook.Sheets("Split Data")
     On Error GoTo 0
-    
+
     If wsDest Is Nothing Then
         ' Destination worksheet does not exist, create it
         Set wsDest = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
         wsDest.Name = "Split Data"
     End If
-    
+
     ' Define the range containing your data in the source sheet
-    Set dataRange = wsSource.Range("A1:A" & wsSource.Cells(wsSource.Rows.Count, "A").End(xlUp).Row)
+    Set dataRange = wsSource.Range("A1").CurrentRegion ' Includes all rows and columns in the current region of A1
     
-    ' Sort the data in the source range
-    dataRange.Sort key1:=dataRange, order1:=xlAscending, Header:=xlNo
-    
+    ' Sort the data in the source range based on column A
+    dataRange.Sort key1:=wsSource.Range("A1"), order1:=xlAscending, Header:=xlNo
+
     ' Clear contents of destination sheet before moving data
     wsDest.Cells.Clear
-    
+
     ' Initialize variables
     lastRow = 1
-    currentPrefix = Left(dataRange.Cells(1).Value, 2)
+    currentPrefix = Left(dataRange.Cells(1, 1).Value, 2)
     rowCount = 0
-    
-    ' Loop through each cell in the sorted range
-    For Each cell In dataRange
+
+    ' Loop through each cell in the sorted range, starting from the first row
+    For i = 1 To dataRange.Rows.Count
+        Set cell = dataRange.Cells(i, 1)
+
         ' Check if the prefix of the current cell is different from the previous cell
         If Left(cell.Value, 2) <> currentPrefix Then
             ' Insert an empty line
             wsDest.Rows(lastRow + rowCount).Insert Shift:=xlDown
-            
+
             ' Update the current prefix
             currentPrefix = Left(cell.Value, 2)
-            
+
             ' Update last row and reset rowCount
             lastRow = lastRow + rowCount + 1
             rowCount = 0
         End If
-        
+
         ' Copy the entire row to the next available row in the destination sheet
         cell.EntireRow.Copy wsDest.Rows(lastRow + rowCount)
-        
+
         ' Increment rowCount
         rowCount = rowCount + 1
-    Next cell
+    Next i
 
- ' Auto fit columns in the destination sheet
+    ' Auto fit columns in the destination sheet
     wsDest.Columns.AutoFit
 End Sub
